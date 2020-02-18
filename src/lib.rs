@@ -1,3 +1,4 @@
+//! prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
 use std::io::{self, Write};
 
 pub struct Prgrs<T: Iterator> {
@@ -7,6 +8,16 @@ pub struct Prgrs<T: Iterator> {
 }
 
 impl<T: Iterator> Prgrs<T> {
+    /// Creates a new Prgrs struct.
+    ///
+    /// You have to specify the number of elements in the Iterator as the second argument
+    /// # Example
+    /// ```
+    /// use prgrs::Prgrs;
+    /// for _ in Prgrs::new(0..100, 100){
+    ///     // do something here
+    ///}
+    /// ```
     pub fn new(it: T, size: usize) -> Self {
         Prgrs::<T> {
             iter: it,
