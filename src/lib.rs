@@ -52,7 +52,11 @@ impl<T: Iterator> Iterator for Prgrs<T> {
         match next {
             Some(_) => {
                 self.curr += 1;
-                print!("\r{} ({}/{})", self.create_bar(), self.curr, self.size);
+                print!(
+                    "{} ({:.0}%)\r",
+                    self.create_bar(),
+                    (self.curr as f32 / self.size as f32) * 100.
+                );
                 io::stdout().flush().unwrap();
             }
             None => {

@@ -1,8 +1,11 @@
 [package]
 name = "prgrs"
+description = "prgrs is a progress bar for rust, that aims to work like the python package tqdm"
 version = "0.1.0"
-authors = ["phil <ph-ketteni@t-online.de>"]
+authors = ["phil0x2e <ph-ketteni@t-online.de>"]
 edition = "2018"
+repository = "https://github.com/phil0x2e/prgrs/"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
