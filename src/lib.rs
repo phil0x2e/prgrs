@@ -1,5 +1,6 @@
 //! prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
-use std::io::{self, Write};
+use std::io::Write;
+use terminal::{error, Action, Clear, Retrieved, Value};
 
 pub struct Prgrs<T: Iterator> {
     iter: T,
@@ -49,21 +50,61 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        match next {
-            Some(_) => {
-                self.curr += 1;
-                print!(
-                    "{} ({:.0}%)\r",
-                    self.create_bar(),
-                    (self.curr as f32 / self.size as f32) * 100.
-                );
-                io::stdout().flush().unwrap();
-            }
-            None => {
-                println!();
+        let mut terminal = terminal::stdout();
+        if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition).unwrap() {
+            match next {
+                Some(_) => {
+                    self.curr += 1;
+                    if let Retrieved::CursorPosition(_x, y) =
+                        terminal.get(Value::CursorPosition).unwrap()
+                    {
+                        terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
+                        terminal
+                            .write(
+                                format!(
+                                    "{} ({:.0}%)",
+                                    self.create_bar(),
+                                    (self.curr as f32 / self.size as f32) * 100.
+                                )
+                                .as_bytes(),
+                            )
+                            .unwrap();
+                        terminal.flush_batch().unwrap();
+                    }
+                }
+                None => {
+                    terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
+                    terminal
+                        .write(format!("{} ({:.0}%)\n", self.create_bar(), 100).as_bytes())
+                        .unwrap();
+                    terminal.flush_batch().unwrap();
+                }
             }
         }
         next
+    }
+}
+
+/// Used to write somethin to the terminal, while displaying a progress bar
+///
+/// # Example
+/// ```
+/// use prgrs::{Prgrs, writeln};
+/// for i in Prgrs::new(0..100, 100){
+///     writeln("test");
+///}
+/// ```
+
+pub fn writeln(text: &str) {
+    let mut terminal = terminal::stdout();
+    if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition).unwrap() {
+        terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
+        terminal
+            .act(Action::ClearTerminal(Clear::FromCursorDown))
+            .unwrap();
+        terminal.write(format!("{}\n", text).as_bytes()).unwrap();
+
+        terminal.flush_batch().unwrap();
     }
 }
 
