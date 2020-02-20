@@ -3,7 +3,12 @@ prgrs is a progress bar for rust, that aims to work like the python package [tqd
 
 Example:
 ```rust
+use std::{thread, time};
+use prgrs::{Prgrs, writeln};
+
 for _i in Prgrs::new(0..1000, 1000) {
     thread::sleep(time::Duration::from_millis(5));
+    let str = format!("{}", i);
+    writeln(&str);
 }
 ```
