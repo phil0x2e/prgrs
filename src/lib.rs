@@ -13,7 +13,7 @@ impl<T: Iterator> Prgrs<T> {
     ///
     /// You have to specify the number of elements in the Iterator as the second argument
     /// # Example
-    /// ```
+    /// ```ignore
     /// use prgrs::Prgrs;
     /// for _ in Prgrs::new(0..100, 100){
     ///     // do something here
@@ -88,7 +88,7 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 /// Used to write somethin to the terminal, while displaying a progress bar
 ///
 /// # Example
-/// ```
+/// ```ignore
 /// use prgrs::{Prgrs, writeln};
 /// for i in Prgrs::new(0..100, 100){
 ///     writeln("test");
@@ -100,8 +100,7 @@ pub fn writeln(text: &str) {
     if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition).unwrap() {
         terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
         terminal
-            .act(Action::ClearTerminal(Clear::FromCursorDown))
-            .unwrap();
+            .act(Action::ClearTerminal(Clear::FromCursorDown)).unwrap();
         terminal.write(format!("{}\n", text).as_bytes()).unwrap();
 
         terminal.flush_batch().unwrap();
