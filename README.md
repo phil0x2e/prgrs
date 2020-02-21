@@ -14,4 +14,6 @@ for i in Prgrs::new(0..1000, 1000) {
 ```
 
 ## Todos:
+- Set default length in proportion to the size of the terminal
+- Make the length of the progress bar customizable
 - Prevent flickering

@@ -90,7 +90,7 @@ impl<T: Iterator> Iterator for Prgrs<T> {
     }
 }
 
-/// Used to write somethin to the terminal, while displaying a progress bar
+/// Use this function to write to the terminal, while displaying a progress bar
 ///
 /// # Example
 /// ```
