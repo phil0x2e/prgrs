@@ -9,10 +9,9 @@ use prgrs::{Prgrs, writeln};
 for i in Prgrs::new(0..1000, 1000) {
     thread::sleep(time::Duration::from_millis(5));
     let str = format!("{}", i);
-    writeln(&str);
+    writeln(&str).expect("prgrs::writeln: Some Problem occured while trying to print");
 }
 ```
 
 ## Todos:
- - Fix doc tests
- - Better error handling
+- Prevent flickering

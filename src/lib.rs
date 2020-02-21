@@ -1,5 +1,5 @@
 //! prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
-use std::io::Write;
+use std::io::{self, Write};
 use terminal::{error, Action, Clear, Retrieved, Value};
 
 pub struct Prgrs<T: Iterator> {
@@ -13,7 +13,7 @@ impl<T: Iterator> Prgrs<T> {
     ///
     /// You have to specify the number of elements in the Iterator as the second argument
     /// # Example
-    /// ```ignore
+    /// ```
     /// use prgrs::Prgrs;
     /// for _ in Prgrs::new(0..100, 100){
     ///     // do something here
@@ -43,6 +43,21 @@ impl<T: Iterator> Prgrs<T> {
         buf.push_str("]");
         buf
     }
+
+    fn print_bar(&mut self) -> error::Result<()> {
+        let mut terminal = terminal::stdout();
+        if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition)? {
+            self.curr += 1;
+            terminal.batch(Action::MoveCursorTo(0, y))?;
+            let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
+            if percentage > 100. {
+                percentage = 100.;
+            }
+            terminal.write(format!("{} ({:.0}%)", self.create_bar(), percentage).as_bytes())?;
+            terminal.flush_batch()?;
+        }
+        Ok(())
+    }
 }
 
 impl<T: Iterator> Iterator for Prgrs<T> {
@@ -50,61 +65,50 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        let mut terminal = terminal::stdout();
-        if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition).unwrap() {
-            match next {
-                Some(_) => {
-                    self.curr += 1;
-                    if let Retrieved::CursorPosition(_x, y) =
-                        terminal.get(Value::CursorPosition).unwrap()
-                    {
-                        terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
-                        terminal
-                            .write(
-                                format!(
-                                    "{} ({:.0}%)",
-                                    self.create_bar(),
-                                    (self.curr as f32 / self.size as f32) * 100.
-                                )
-                                .as_bytes(),
-                            )
-                            .unwrap();
-                        terminal.flush_batch().unwrap();
-                    }
+        match self.print_bar() {
+            Err(_e) => {
+                let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
+                if percentage > 100. {
+                    percentage = 100.;
                 }
-                None => {
-                    terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
-                    terminal
-                        .write(format!("{} ({:.0}%)\n", self.create_bar(), 100).as_bytes())
-                        .unwrap();
-                    terminal.flush_batch().unwrap();
+                print!("{} ({:.0}%)\r", self.create_bar(), percentage);
+                match io::stdout().flush() {
+                    Err(_) => {}
+                    Ok(_) => {}
                 }
             }
+            Ok(_) => {}
         }
-        next
+
+        match next {
+            Some(n) => Some(n),
+            None => {
+                println!("");
+                None
+            }
+        }
     }
 }
 
 /// Used to write somethin to the terminal, while displaying a progress bar
 ///
 /// # Example
-/// ```ignore
+/// ```
 /// use prgrs::{Prgrs, writeln};
 /// for i in Prgrs::new(0..100, 100){
-///     writeln("test");
+///     writeln("test").expect("Error while printing");
 ///}
 /// ```
 
-pub fn writeln(text: &str) {
+pub fn writeln(text: &str) -> error::Result<()> {
     let mut terminal = terminal::stdout();
-    if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition).unwrap() {
-        terminal.batch(Action::MoveCursorTo(0, y)).unwrap();
-        terminal
-            .act(Action::ClearTerminal(Clear::FromCursorDown)).unwrap();
-        terminal.write(format!("{}\n", text).as_bytes()).unwrap();
-
-        terminal.flush_batch().unwrap();
+    if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition)? {
+        terminal.batch(Action::MoveCursorTo(0, y))?;
+        terminal.act(Action::ClearTerminal(Clear::FromCursorDown))?;
+        terminal.write(format!("{}\n", text).as_bytes())?;
+        terminal.flush_batch()?;
     }
+    Ok(())
 }
 
 #[cfg(test)]
