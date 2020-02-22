@@ -20,6 +20,4 @@ fn main() {
 ```
 
 ## Todos:
-- Fix Issue where in some terminal emulators e.g. urxvt the entire screen is cleared and the progress bar is always at the very top and writeln doesn't work
-  - The issue here seems to be, that most terminals don't work with multiple terminal::Terminal instances. But they are needed, because of the writeln function. I'll try to find a solution ASAP
 - Prevent flickering

@@ -1,6 +1,7 @@
 //! prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
-use std::io::{self, Stdout, Write};
+use std::io::{self, Error, ErrorKind, Stdout, Write};
 use terminal::{error, Action, Clear, Retrieved, Terminal, Value};
+use terminal_size::{terminal_size, Height, Width};
 
 pub struct Prgrs<T: Iterator> {
     iter: T,
@@ -124,6 +125,7 @@ impl<T: Iterator> Prgrs<T> {
         if let Retrieved::CursorPosition(_x, y) = self.term.get(Value::CursorPosition)? {
             self.curr += 1;
             self.term.batch(Action::MoveCursorTo(0, y))?;
+            self.term.act(Action::ClearTerminal(Clear::CurrentLine))?;
             let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
             if percentage > 100. {
                 percentage = 100.;
@@ -179,15 +181,25 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 ///}
 /// ```
 
-pub fn writeln(text: &str) -> error::Result<()> {
-    let mut terminal = terminal::stdout();
-    if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition)? {
-        terminal.batch(Action::MoveCursorTo(0, y))?;
-        terminal.act(Action::ClearTerminal(Clear::CurrentLine))?;
-        terminal.write(format!("{}\n", text).as_bytes())?;
-        terminal.flush_batch()?;
+fn get_n_whitespaces(n: usize) -> String {
+    let mut buf = String::new();
+    for _ in 0..n {
+        buf.push_str(" ");
     }
-    Ok(())
+    buf
+}
+
+pub fn writeln(text: &str) -> Result<(), Error> {
+    let size = terminal_size();
+    if let Some((Width(w), Height(_h))) = size {
+        println!("\r{}{}", text, get_n_whitespaces(w as usize - text.len()));
+        return Ok(());
+    } else {
+        return Err(Error::new(
+            ErrorKind::Other,
+            "Issue determining size of your terminal",
+        ));
+    }
 }
 
 #[cfg(test)]
