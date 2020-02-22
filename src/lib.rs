@@ -129,7 +129,7 @@ impl<T: Iterator> Prgrs<T> {
                 percentage = 100.;
             }
             self.term
-                .write(format!("{} ({:.0}%)", self.create_bar(), percentage).as_bytes())?;
+                .write(format!("{} ({:3.0}%)", self.create_bar(), percentage).as_bytes())?;
             self.term.flush_batch()?;
         }
         Ok(())
@@ -147,7 +147,7 @@ impl<T: Iterator> Iterator for Prgrs<T> {
                 if percentage > 100. {
                     percentage = 100.;
                 }
-                print!("{} ({:.0}%)\r", self.create_bar(), percentage);
+                print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
                 match io::stdout().flush() {
                     Err(_) => (),
                     Ok(_) => (),
@@ -183,7 +183,7 @@ pub fn writeln(text: &str) -> error::Result<()> {
     let mut terminal = terminal::stdout();
     if let Retrieved::CursorPosition(_x, y) = terminal.get(Value::CursorPosition)? {
         terminal.batch(Action::MoveCursorTo(0, y))?;
-        terminal.act(Action::ClearTerminal(Clear::FromCursorDown))?;
+        terminal.act(Action::ClearTerminal(Clear::CurrentLine))?;
         terminal.write(format!("{}\n", text).as_bytes())?;
         terminal.flush_batch()?;
     }
