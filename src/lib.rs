@@ -178,16 +178,8 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 ///         Ok(_)=>(),
 ///         Err(_) =>  println!("test")
 ///     }
-///}
+/// }
 /// ```
-
-fn get_n_whitespaces(n: usize) -> String {
-    let mut buf = String::new();
-    for _ in 0..n {
-        buf.push_str(" ");
-    }
-    buf
-}
 
 pub fn writeln(text: &str) -> Result<(), Error> {
     let size = terminal_size();
@@ -200,6 +192,14 @@ pub fn writeln(text: &str) -> Result<(), Error> {
             "Issue determining size of your terminal",
         ));
     }
+}
+
+fn get_n_whitespaces(n: usize) -> String {
+    let mut buf = String::new();
+    for _ in 0..n {
+        buf.push_str(" ");
+    }
+    buf
 }
 
 #[cfg(test)]

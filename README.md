@@ -19,5 +19,7 @@ fn main() {
 }
 ```
 
+Please use Version 0.5.0 or higher, the older versions only work with very few terminals and are therefore yanked from crates.io.
+
 ## Todos:
 - Prevent flickering
