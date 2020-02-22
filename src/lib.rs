@@ -1,4 +1,19 @@
 //! prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
+//! # Example
+//! ```
+//! use prgrs::{Prgrs, writeln, Length};
+//! use std::{thread, time};
+//!
+//! fn main() {
+//!     for i in Prgrs::new(0..1000, 1000).set_length_move(Length::Proportional(0.5)){
+//!         thread::sleep(time::Duration::from_millis(10));
+//!         if i % 10 == 0{
+//!             let str = format!("{}", i);
+//!             writeln(&str).ok();
+//!         }
+//!     }
+//! }
+//! ```
 use std::io::{self, Error, ErrorKind, Stdout, Write};
 use terminal::{error, Action, Clear, Retrieved, Terminal, Value};
 use terminal_size::{terminal_size, Height, Width};
