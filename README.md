@@ -20,6 +20,5 @@ fn main() {
 ```
 
 ## Todos:
-- Set default length in proportion to the size of the terminal
-- Make the length of the progress bar customizable
+- Fix Issue where in some terminal emulators e.g. urxvt the entire screen is cleared and the progress bar is always at the very top and writeln doesn't work
 - Prevent flickering
