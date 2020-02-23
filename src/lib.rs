@@ -192,8 +192,8 @@ pub fn writeln(text: &str) -> Result<(), Error> {
     if let Some((Width(w), Height(_h))) = size {
         // The whitespaces override the rest of the line, because \r doesn't delete characters already printed
         let num_missing_whitespaces = w as usize - text.len();
-        let whitespaces = (0..num_missing_whitespaces)
-            .map(|_| " ")
+        let whitespaces = std::iter::repeat(" ")
+            .take(num_missing_whitespaces)
             .collect::<String>();
         println!("\r{}{}", text, whitespaces);
         return Ok(());
