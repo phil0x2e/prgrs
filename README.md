@@ -24,11 +24,10 @@ fn main() {
     }
 }
 ```
-The output will look something like this: 
+The output will look something like this:
 ```
 [########################                                  ] ( 42%)
 ```
 
 ## Todos:
 - Prevent flickering
-- Improve performance

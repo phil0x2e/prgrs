@@ -116,12 +116,12 @@ impl<T: Iterator> Prgrs<T> {
     }
 
     fn create_bar(&self) -> String {
+        let symbol = "#";
         let len = self.get_absolute_length();
         let mut steps = 1;
         if len > 10 {
             steps = len - 9; // 9 is length of all the other characters in the progress bar
         }
-        let symbol = "#";
         let mut buf = String::new();
         buf.push_str("[");
         let ratio = self.curr as f32 / self.size as f32;
@@ -187,11 +187,15 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 ///     }
 /// }
 /// ```
-
 pub fn writeln(text: &str) -> Result<(), Error> {
     let size = terminal_size();
     if let Some((Width(w), Height(_h))) = size {
-        println!("\r{}{}", text, get_n_whitespaces(w as usize - text.len()));
+        // The whitespaces override the rest of the line, because \r doesn't delete characters already printed
+        let num_missing_whitespaces = w as usize - text.len();
+        let whitespaces = (0..num_missing_whitespaces)
+            .map(|_| " ")
+            .collect::<String>();
+        println!("\r{}{}", text, whitespaces);
         return Ok(());
     } else {
         return Err(Error::new(
@@ -199,14 +203,6 @@ pub fn writeln(text: &str) -> Result<(), Error> {
             "Issue determining size of your terminal",
         ));
     }
-}
-
-fn get_n_whitespaces(n: usize) -> String {
-    let mut buf = String::new();
-    for _ in 0..n {
-        buf.push_str(" ");
-    }
-    buf
 }
 
 #[cfg(test)]
