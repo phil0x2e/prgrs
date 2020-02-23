@@ -26,7 +26,7 @@ fn main() {
 ```
 The output will look something like this:
 ```
-[########################                                  ] ( 42%)
+[##############                     ] ( 42%)
 ```
 
 ## Todos:
