@@ -3,7 +3,7 @@ prgrs is a progress bar for rust, that aims to work like the python package [tqd
 
 
 
-prgrs should work for almost any linux terminal emulator. Windows could work too, because terminal supports windows but I haven't tested yes, so please let me know if you have.
+prgrs should work for almost any linux terminal emulator. Windows could work too, because terminal supports windows but I haven't tested yet, so please let me know if you have.
 
 Have a look at the [Documentation](https://docs.rs/prgrs)
 
