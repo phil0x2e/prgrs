@@ -158,40 +158,32 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        match self.print_bar() {
-            Err(_e) => {
-                let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
-                if percentage > 100. {
-                    percentage = 100.;
-                }
-                print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
-                match io::stdout().flush() {
-                    Err(_) => (),
-                    Ok(_) => (),
-                }
+        if let Err(_e) = self.print_bar() {
+            let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
+            if percentage > 100. {
+                percentage = 100.;
             }
-            Ok(_) => {}
+            print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
+            io::stdout().flush().ok();
         }
 
-        match next {
-            Some(n) => Some(n),
-            None => {
-                println!("");
-                None
-            }
+        if let None = next {
+            println!("");
         }
+        next
     }
 }
 
-/// Use this function to write to the terminal, while displaying a progress bar
+/// Use this function to write to the terminal, while displaying a progress bar.
+///
+/// It may return an error, when the size of the terminal couldn't be determined.
 ///
 /// # Example
 /// ```
 /// use prgrs::{Prgrs, writeln};
 /// for i in Prgrs::new(0..100, 100){
-///     match writeln("test") {
-///         Ok(_)=>(),
-///         Err(_) =>  println!("test")
+///     if let Err(_) = writeln("test") {
+///         println!("test")
 ///     }
 /// }
 /// ```
