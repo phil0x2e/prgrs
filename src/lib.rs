@@ -138,7 +138,6 @@ impl<T: Iterator> Prgrs<T> {
 
     fn print_bar(&mut self) -> error::Result<()> {
         if let Retrieved::CursorPosition(_x, y) = self.term.get(Value::CursorPosition)? {
-            self.curr += 1;
             self.term.batch(Action::MoveCursorTo(0, y))?;
             self.term.act(Action::ClearTerminal(Clear::CurrentLine))?;
             let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
@@ -170,6 +169,7 @@ impl<T: Iterator> Iterator for Prgrs<T> {
         if let None = next {
             println!("");
         }
+        self.curr += 1;
         next
     }
 }
