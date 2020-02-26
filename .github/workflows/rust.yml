@@ -15,3 +15,5 @@ jobs:
       run: cargo test --verbose
     - name: Run lib tests
       run: cargo test --lib
+    - name: Check format 
+      run: cargo fmt --all -- --check
