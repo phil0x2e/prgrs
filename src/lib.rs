@@ -44,7 +44,7 @@ pub struct Prgrs<T: Iterator> {
 /// values, that would make make the bar smaller than a single step however like negative values or for example 2 are ignored and the bar will have a single steps
 pub enum Length {
     Absolute(usize),
-    Proportional(f32),
+    Proportional(f64),
 }
 
 impl<T: Iterator> Prgrs<T> {
@@ -109,7 +109,7 @@ impl<T: Iterator> Prgrs<T> {
                     if p < 0. {
                         p = 0.;
                     }
-                    (x as f32 * p) as usize
+                    (x as f64 * p) as usize
                 } else {
                     30
                 }
@@ -131,8 +131,8 @@ impl<T: Iterator> Prgrs<T> {
                 buf.push_str(symbol);
             }
         } else {
-            let ratio = self.curr as f32 / self.size as f32;
-            let num_symbols = (ratio * steps as f32) as usize;
+            let ratio = self.curr as f64 / self.size as f64;
+            let num_symbols = (ratio * steps as f64) as usize;
             for _ in 0..num_symbols {
                 buf.push_str(symbol);
             }
@@ -150,7 +150,7 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
+        let mut percentage = (self.curr as f64 / self.size as f64) * 100.;
         if percentage > 100. {
             percentage = 100.;
         }
