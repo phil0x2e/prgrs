@@ -14,8 +14,7 @@
 //!     }
 //! }
 //! ```
-use std::io::{self, Error, ErrorKind, Stdout, Write};
-use terminal::{error, Action, Clear, Retrieved, Terminal, Value};
+use std::io::{self, Error, ErrorKind, Write};
 use terminal_size::{terminal_size, Height, Width};
 
 pub struct Prgrs<T: Iterator> {
@@ -23,7 +22,6 @@ pub struct Prgrs<T: Iterator> {
     size: usize,
     curr: usize,
     len: Length,
-    term: Terminal<Stdout>,
 }
 
 /// Use this struct to set the length of the progress debug_assert!
@@ -61,7 +59,6 @@ impl<T: Iterator> Prgrs<T> {
             size,
             curr: 0,
             len: Length::Proportional(0.33),
-            term: terminal::stdout(),
         }
     }
 
@@ -100,7 +97,7 @@ impl<T: Iterator> Prgrs<T> {
         match self.len {
             Length::Absolute(l) => l,
             Length::Proportional(mut p) => {
-                if let Ok(Retrieved::TerminalSize(x, _y)) = self.term.get(Value::TerminalSize) {
+                if let Some((Width(x), Height(_y))) = terminal_size() {
                     if p > 1. {
                         p = 1.;
                     }
@@ -135,21 +132,6 @@ impl<T: Iterator> Prgrs<T> {
         buf.push_str("]");
         buf
     }
-
-    fn print_bar(&mut self) -> error::Result<()> {
-        if let Retrieved::CursorPosition(_x, y) = self.term.get(Value::CursorPosition)? {
-            self.term.batch(Action::MoveCursorTo(0, y))?;
-            self.term.act(Action::ClearTerminal(Clear::CurrentLine))?;
-            let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
-            if percentage > 100. {
-                percentage = 100.;
-            }
-            self.term
-                .write(format!("{} ({:3.0}%)", self.create_bar(), percentage).as_bytes())?;
-            self.term.flush_batch()?;
-        }
-        Ok(())
-    }
 }
 
 impl<T: Iterator> Iterator for Prgrs<T> {
@@ -157,14 +139,12 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        if let Err(_e) = self.print_bar() {
-            let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
-            if percentage > 100. {
-                percentage = 100.;
-            }
-            print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
-            io::stdout().flush().ok();
+        let mut percentage = (self.curr as f32 / self.size as f32) * 100.;
+        if percentage > 100. {
+            percentage = 100.;
         }
+        print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
+        io::stdout().flush().ok();
 
         if let None = next {
             println!("");
