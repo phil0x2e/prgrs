@@ -6,7 +6,7 @@ prgrs should work for almost any linux terminal emulator. Windows could work too
 
 Have a look at the [Documentation](https://docs.rs/prgrs)
 
-Please use Version 0.5.0 or higher, the older versions only work with very few terminals and are therefore yanked from crates.io.
+Please use Version 0.6.0 or higher, the older versions only work correctly with a small amount of terminals.
 
 ### Example:
 ```rust
