@@ -14,6 +14,11 @@
 //!     }
 //! }
 //! ```
+//!
+//! The output will look something like this:
+//!
+//! ```[##############                     ] ( 42%)```
+//!
 use std::io::{self, Error, ErrorKind, Write};
 use terminal_size::{terminal_size, Height, Width};
 
@@ -121,13 +126,19 @@ impl<T: Iterator> Prgrs<T> {
         }
         let mut buf = String::new();
         buf.push_str("[");
-        let ratio = self.curr as f32 / self.size as f32;
-        let num_symbols = (ratio * steps as f32) as usize;
-        for _ in 0..num_symbols {
-            buf.push_str(symbol);
-        }
-        for _ in 0..steps - num_symbols {
-            buf.push_str(" ");
+        if self.size == 0 {
+            for _ in 0..steps {
+                buf.push_str(symbol);
+            }
+        } else {
+            let ratio = self.curr as f32 / self.size as f32;
+            let num_symbols = (ratio * steps as f32) as usize;
+            for _ in 0..num_symbols {
+                buf.push_str(symbol);
+            }
+            for _ in 0..steps - num_symbols {
+                buf.push_str(" ");
+            }
         }
         buf.push_str("]");
         buf
@@ -143,7 +154,21 @@ impl<T: Iterator> Iterator for Prgrs<T> {
         if percentage > 100. {
             percentage = 100.;
         }
-        print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
+        if percentage.is_nan() {
+            // Happens, when size is 0
+            percentage = 100.;
+        }
+        if let Some((Width(w), Height(_h))) = terminal_size() {
+            let whitespaces = std::iter::repeat(" ").take(w as usize).collect::<String>();
+            print!(
+                "\r{}\r{} ({:3.0}%)\r",
+                whitespaces,
+                self.create_bar(),
+                percentage
+            );
+        } else {
+            print!("{} ({:3.0}%)\r", self.create_bar(), percentage);
+        }
         io::stdout().flush().ok();
 
         if let None = next {
@@ -171,10 +196,8 @@ pub fn writeln(text: &str) -> Result<(), Error> {
     let size = terminal_size();
     if let Some((Width(w), Height(_h))) = size {
         // The whitespaces override the rest of the line, because \r doesn't delete characters already printed
-        let num_missing_whitespaces = w as usize - text.len();
-        let whitespaces = std::iter::repeat(" ")
-            .take(num_missing_whitespaces)
-            .collect::<String>();
+        let whitespaces = w as usize - text.len();
+        let whitespaces = std::iter::repeat(" ").take(whitespaces).collect::<String>();
         println!("\r{}{}", text, whitespaces);
         return Ok(());
     } else {
