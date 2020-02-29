@@ -1,6 +1,7 @@
 # prgrs - A simple to use progress bar for your iterators
-prgrs is a progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
+prgrs is a simple progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
 
+It is a small library with just a single dependency.
 
 prgrs should work for almost any linux terminal emulator. Windows could work too, because terminal supports windows but I haven't tested yet, so please let me know if you have.
 
@@ -24,9 +25,9 @@ fn main() {
 }
 ```
 The output will look something like this:
-```
-[##############                     ] ( 42%)
-```
+
+`[##############                     ] ( 42%)`
 
 ## Todos:
+- Feature to print current iteration from total iterations instead of a percentage
 - Prevent flickering
