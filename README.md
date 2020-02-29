@@ -5,7 +5,7 @@ It is a small library with just a single dependency.
 
 prgrs should work for almost any linux terminal emulator. Windows could work too, because terminal supports windows but I haven't tested yet, so please let me know if you have.
 
-Have a look at the [Documentation](https://docs.rs/prgrs)
+Have a look at the [Documentation](https://docs.rs/prgrs).
 
 Please use Version 0.6.0 or higher, the older versions only work correctly with a small amount of terminals.
 
