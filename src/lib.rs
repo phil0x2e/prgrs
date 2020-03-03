@@ -116,34 +116,36 @@ impl<T: Iterator> Prgrs<T> {
                 if let Some((Width(x), Height(_y))) = terminal_size() {
                     if p > 1. {
                         p = 1.;
-                    }
-                    if p < 0. {
+                    } else if p < 0. {
                         p = 0.;
                     }
                     (x as f64 * p) as usize
                 } else {
-                    30
+                    50
                 }
             }
         }
+    }
+
+    fn get_ratio(&self) -> f64 {
+        self.curr as f64 / self.size as f64
     }
 
     fn create_bar(&self) -> String {
         let symbol = "#";
         let len = self.get_absolute_length();
         let mut steps = 1;
-        if len > 10 {
-            steps = len - 9; // 9 is length of all the other characters in the progress bar
+        let additional_chars = "[] (100%)".len();
+        if len > additional_chars + 1 {
+            steps = len - additional_chars;
         }
-        let mut buf = String::new();
-        buf.push_str("[");
+        let mut buf = String::from("[");
         if self.size == 0 {
             for _ in 0..steps {
                 buf.push_str(symbol);
             }
         } else {
-            let ratio = self.curr as f64 / self.size as f64;
-            let num_symbols = (ratio * steps as f64) as usize;
+            let num_symbols = (self.get_ratio() * steps as f64) as usize;
             for _ in 0..num_symbols {
                 buf.push_str(symbol);
             }
@@ -161,12 +163,8 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 
     fn next(&mut self) -> std::option::Option<Self::Item> {
         let next = self.iter.next();
-        let mut percentage = (self.curr as f64 / self.size as f64) * 100.;
-        if percentage > 100. {
-            percentage = 100.;
-        }
-        if percentage.is_nan() {
-            // Happens, when size is 0
+        let mut percentage = self.get_ratio() * 100.;
+        if percentage > 100. || percentage.is_nan() {
             percentage = 100.;
         }
         if let Some((Width(w), Height(_h))) = terminal_size() {
@@ -205,18 +203,17 @@ impl<T: Iterator> Iterator for Prgrs<T> {
 /// }
 /// ```
 pub fn writeln(text: &str) -> Result<(), Error> {
-    let size = terminal_size();
-    if let Some((Width(w), Height(_h))) = size {
+    if let Some((Width(w), Height(_h))) = terminal_size() {
         // The whitespaces override the rest of the line, because \r doesn't delete characters already printed
-        let whitespaces = w as usize - text.len();
+        let whitespaces = (w as usize).checked_sub(text.len()).unwrap_or(0);
         let whitespaces = std::iter::repeat(" ").take(whitespaces).collect::<String>();
         println!("\r{}{}", text, whitespaces);
-        return Ok(());
+        Ok(())
     } else {
-        return Err(Error::new(
+        Err(Error::new(
             ErrorKind::Other,
             "Issue determining size of your terminal",
-        ));
+        ))
     }
 }
 
@@ -227,5 +224,6 @@ mod tests {
     fn test_prgrs() {
         assert_eq!(Prgrs::new(1..100, 100).next(), (1..100).next());
         assert_eq!(Prgrs::new(1..100, 100).last(), (1..100).last());
+        assert_eq!(Prgrs::new(0..0, 0).next(), None);
     }
 }

@@ -25,8 +25,9 @@ fn main() {
 }
 ```
 The output will look something like this:
-
-`[##############                     ] ( 42%)`
+```
+[##############                     ] ( 42%)
+```
 
 ## Todos:
 - Feature to print current iteration from total iterations instead of a percentage
