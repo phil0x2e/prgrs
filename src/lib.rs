@@ -161,7 +161,7 @@ impl<T: Iterator> Prgrs<T> {
 impl<T: Iterator> Iterator for Prgrs<T> {
     type Item = T::Item;
 
-    fn next(&mut self) -> std::option::Option<Self::Item> {
+    fn next(&mut self) -> Option<Self::Item> {
         let next = self.iter.next();
         let mut percentage = self.get_ratio() * 100.;
         if percentage > 100. || percentage.is_nan() {
@@ -219,7 +219,7 @@ pub fn writeln(text: &str) -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Prgrs;
+    use super::*;
     #[test]
     fn test_prgrs() {
         assert_eq!(Prgrs::new(1..100, 100).next(), (1..100).next());
