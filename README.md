@@ -1,3 +1,5 @@
+[![prgrs crate](https://img.shields.io/crates/v/prgrs.svg)](https://crates.io/crates/prgrs)
+[![prgrs documentation](https://docs.rs/prgrs/badge.svg)](https://docs.rs/prgrs)
 # prgrs - A simple to use progress bar for your iterators
 prgrs is a simple progress bar for rust, that aims to work like the python package [tqdm](https://github.com/tqdm/tqdm).
 
